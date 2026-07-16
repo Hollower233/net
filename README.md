@@ -2,6 +2,8 @@
 
 `hollower233/net` is a small static networking module for Roblox. It creates remotes on the server and resolves them on clients by name.
 
+`init.lua` is the authoritative API documentation: it contains the lifecycle rules and runnable examples beside every public method.
+
 ## Key behavior
 
 Client lookup always waits until the named remote is replicated. It is never discarded merely because server initialization or replication takes longer than ten seconds. Roblox may log an infinite-yield warning while the remote is absent.
