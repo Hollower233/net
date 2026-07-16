@@ -24,11 +24,18 @@ end
 
 local function getServerRemote(remoteName: string, className: string): Instance
 	local remote = script:FindFirstChild(remoteName)
-	if remote == nil then
-		remote = Instance.new(className)
-		remote.Name = remoteName
-		remote.Parent = script
+	if remote ~= nil then
+		if not remote:IsA(className) then
+			error(`Remote "{remoteName}" already exists as {remote.ClassName}, expected {className}`, 3)
+		end
+
+		warn(`Remote "{remoteName}" already exists; reusing the existing {className}`)
+		return remote
 	end
+
+	remote = Instance.new(className)
+	remote.Name = remoteName
+	remote.Parent = script
 
 	if not remote:IsA(className) then
 		error(`Remote "{remoteName}" already exists as {remote.ClassName}, expected {className}`, 3)

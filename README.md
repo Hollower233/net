@@ -8,6 +8,8 @@ Client lookup always waits until the named remote is replicated. It is never dis
 
 The server should still register every remote during startup so clients never wait for a module that was not initialized.
 
+On the server, calling `RemoteEvent(name)` or `RemoteFunction(name)` for an already-created remote logs a warning and reuses it. A name that already belongs to the other remote type raises an error.
+
 ## API
 
 ```lua
