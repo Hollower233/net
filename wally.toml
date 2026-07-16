@@ -1,0 +1,9 @@
+[package]
+name = "hollower233/net"
+description = "Static Roblox networking with explicit remote lifecycle control"
+version = "0.1.0"
+license = "MIT"
+authors = ["Hollower233"]
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+exclude = ["rokit.toml"]
