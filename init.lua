@@ -1,8 +1,6 @@
 local RunService = game:GetService("RunService")
 
-local Net = {
-	clientTimeout = nil :: number?,
-}
+local Net = {}
 
 local function assertRemoteName(name: string)
 	if type(name) ~= "string" or name == "" then
@@ -18,15 +16,6 @@ end
 local function waitForRemote(remoteName: string): Instance
 	local remote = script:FindFirstChild(remoteName)
 	if remote then
-		return remote
-	end
-
-	local timeout = Net.clientTimeout
-	if timeout ~= nil then
-		remote = script:WaitForChild(remoteName, timeout)
-		if remote == nil then
-			error(`Timed out waiting for remote "{remoteName}" after {timeout} seconds`, 3)
-		end
 		return remote
 	end
 
@@ -46,17 +35,6 @@ local function getServerRemote(remoteName: string, className: string): Instance
 	end
 
 	return remote
-end
-
-function Net:SetClientTimeout(timeout: number?)
-	if RunService:IsServer() then
-		error("SetClientTimeout can only be called on the client", 2)
-	end
-	if timeout ~= nil and (type(timeout) ~= "number" or timeout < 0) then
-		error("Client timeout must be nil or a non-negative number", 2)
-	end
-
-	self.clientTimeout = timeout
 end
 
 function Net:RemoteEvent(name: string): RemoteEvent

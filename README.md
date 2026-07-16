@@ -4,7 +4,7 @@
 
 ## Key behavior
 
-Client lookup waits indefinitely by default. This prevents a remote from being discarded merely because server initialization or replication takes longer than ten seconds. Roblox may log an infinite-yield warning while it waits; to opt into a failure deadline, call `Net:SetClientTimeout(seconds)` from the client before the first lookup.
+Client lookup always waits until the named remote is replicated. It is never discarded merely because server initialization or replication takes longer than ten seconds. Roblox may log an infinite-yield warning while the remote is absent.
 
 The server should still register every remote during startup so clients never wait for a module that was not initialized.
 
