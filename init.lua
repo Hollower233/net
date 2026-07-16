@@ -41,6 +41,16 @@
 
 local RunService = game:GetService("RunService")
 
+type RemoteEventGetter = (name: string) -> RemoteEvent
+type RemoteFunctionGetter = (name: string) -> RemoteFunction
+type EventHandler = (...any) -> ()
+type FunctionHandler = (player: Player, ...any) -> ...any
+type Connector = (name: string, handler: EventHandler) -> RBXScriptConnection
+type FunctionHandlerSetter = (name: string, handler: FunctionHandler) -> ()
+type FunctionInvoker = (name: string, ...any) -> ...any
+type ServerEventFire = (name: string, ...any) -> ()
+type ClientEventFire = (name: string, player: Player, ...any) -> ()
+
 -- 验证公共接口传入的业务名称。
 local function assertRemoteName(name: string)
 	if type(name) ~= "string" or name == "" then
@@ -229,12 +239,12 @@ end
 
 -- 仅导出公开 API；其余函数均为模块内部实现。
 return {
-	remoteEvent = remoteEvent :: (string) -> RemoteEvent,
-	remoteFunction = remoteFunction :: (string) -> RemoteFunction,
-	connect = connect,
-	handle = handle,
-	invoke = invoke,
-	fireServer = fireServer,
-	fireClient = fireClient,
-	fireAllClients = fireAllClients,
+	remoteEvent = remoteEvent :: RemoteEventGetter,
+	remoteFunction = remoteFunction :: RemoteFunctionGetter,
+	connect = connect :: Connector,
+	handle = handle :: FunctionHandlerSetter,
+	invoke = invoke :: FunctionInvoker,
+	fireServer = fireServer :: ServerEventFire,
+	fireClient = fireClient :: ClientEventFire,
+	fireAllClients = fireAllClients :: ServerEventFire,
 }
