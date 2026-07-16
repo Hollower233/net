@@ -41,8 +41,6 @@
 
 local RunService = game:GetService("RunService")
 
-local Net = {}
-
 -- 验证公共接口传入的业务名称。
 local function assertRemoteName(name: string)
 	if type(name) ~= "string" or name == "" then
@@ -98,7 +96,7 @@ end
 	local event = Net.remoteEvent("Round/Started")
 	```
 ]=]
-function Net.remoteEvent(name: string): RemoteEvent
+local function remoteEvent(name: string): RemoteEvent
 	local remoteName = getRemoteName("RE", name)
 	if RunService:IsServer() then
 		return getServerRemote(remoteName, "RemoteEvent") :: RemoteEvent
@@ -120,7 +118,7 @@ end
 	local request = Net.remoteFunction("CloudConfig/GetAll")
 	```
 ]=]
-function Net.remoteFunction(name: string): RemoteFunction
+local function remoteFunction(name: string): RemoteFunction
 	local remoteName = getRemoteName("RF", name)
 	if RunService:IsServer() then
 		return getServerRemote(remoteName, "RemoteFunction") :: RemoteFunction
@@ -144,8 +142,8 @@ end
 	end)
 	```
 ]=]
-function Net.connect(name: string, handler: (...any) -> ()): RBXScriptConnection
-	local remote = Net.remoteEvent(name)
+local function connect(name: string, handler: (...any) -> ()): RBXScriptConnection
+	local remote = remoteEvent(name)
 	if RunService:IsServer() then
 		return remote.OnServerEvent:Connect(handler)
 	end
@@ -161,12 +159,12 @@ end
 	end)
 	```
 ]=]
-function Net.handle(name: string, handler: (player: Player, ...any) -> ...any)
+local function handle(name: string, handler: (player: Player, ...any) -> ...any)
 	if not RunService:IsServer() then
 		error("Handle can only be called on the server", 2)
 	end
 
-	Net.remoteFunction(name).OnServerInvoke = handler
+	remoteFunction(name).OnServerInvoke = handler
 end
 
 --[=[
@@ -176,12 +174,12 @@ end
 	local snapshot = Net.invoke("CloudConfig/GetAll")
 	```
 ]=]
-function Net.invoke(name: string, ...: any): ...any
+local function invoke(name: string, ...: any): ...any
 	if RunService:IsServer() then
 		error("Invoke can only be called on the client", 2)
 	end
 
-	return Net.remoteFunction(name):InvokeServer(...)
+	return remoteFunction(name):InvokeServer(...)
 end
 
 --[=[
@@ -191,12 +189,12 @@ end
 	Net.fireServer("Round/Ready")
 	```
 ]=]
-function Net.fireServer(name: string, ...: any)
+local function fireServer(name: string, ...: any)
 	if RunService:IsServer() then
 		error("FireServer can only be called on the client", 2)
 	end
 
-	Net.remoteEvent(name):FireServer(...)
+	remoteEvent(name):FireServer(...)
 end
 
 --[=[
@@ -206,12 +204,12 @@ end
 	Net.fireClient("Round/Started", player, roundId)
 	```
 ]=]
-function Net.fireClient(name: string, player: Player, ...: any)
+local function fireClient(name: string, player: Player, ...: any)
 	if not RunService:IsServer() then
 		error("FireClient can only be called on the server", 2)
 	end
 
-	Net.remoteEvent(name):FireClient(player, ...)
+	remoteEvent(name):FireClient(player, ...)
 end
 
 --[=[
@@ -221,12 +219,22 @@ end
 	Net.fireAllClients("Round/Started", roundId)
 	```
 ]=]
-function Net.fireAllClients(name: string, ...: any)
+local function fireAllClients(name: string, ...: any)
 	if not RunService:IsServer() then
 		error("FireAllClients can only be called on the server", 2)
 	end
 
-	Net.remoteEvent(name):FireAllClients(...)
+	remoteEvent(name):FireAllClients(...)
 end
 
-return Net
+-- 仅导出公开 API；其余函数均为模块内部实现。
+return {
+	remoteEvent = remoteEvent :: (string) -> RemoteEvent,
+	remoteFunction = remoteFunction :: (string) -> RemoteFunction,
+	connect = connect,
+	handle = handle,
+	invoke = invoke,
+	fireServer = fireServer,
+	fireClient = fireClient,
+	fireAllClients = fireAllClients,
+}
