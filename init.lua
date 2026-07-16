@@ -16,11 +16,11 @@
 	必须在玩家调用前注册远程；推荐在服务启动时调用 `Handle` 或 `Connect`。
 
 	```lua
-	Net.Handle("CloudConfig/GetAll", function(player)
+	Net.handle("CloudConfig/GetAll", function(player)
 		return snapshot
 	end)
 
-	Net.Connect("Round/Ready", function(player)
+	Net.connect("Round/Ready", function(player)
 		print(player.Name, "is ready")
 	end)
 	```
@@ -28,8 +28,8 @@
 	## 客户端调用
 
 	```lua
-	local snapshot = Net.Invoke("CloudConfig/GetAll")
-	Net.FireServer("Round/Ready")
+	local snapshot = Net.invoke("CloudConfig/GetAll")
+	Net.fireServer("Round/Ready")
 	```
 
 	## 命名与冲突
@@ -95,10 +95,10 @@ end
 	服务端不存在时创建，存在时警告并复用；客户端一直等待其复制完成。
 
 	```lua
-	local event = Net.RemoteEvent("Round/Started")
+	local event = Net.remoteEvent("Round/Started")
 	```
 ]=]
-function Net.RemoteEvent(name: string): RemoteEvent
+function Net.remoteEvent(name: string): RemoteEvent
 	local remoteName = getRemoteName("RE", name)
 	if RunService:IsServer() then
 		return getServerRemote(remoteName, "RemoteEvent") :: RemoteEvent
@@ -117,10 +117,10 @@ end
 	服务端不存在时创建，存在时警告并复用；客户端一直等待其复制完成。
 
 	```lua
-	local request = Net.RemoteFunction("CloudConfig/GetAll")
+	local request = Net.remoteFunction("CloudConfig/GetAll")
 	```
 ]=]
-function Net.RemoteFunction(name: string): RemoteFunction
+function Net.remoteFunction(name: string): RemoteFunction
 	local remoteName = getRemoteName("RF", name)
 	if RunService:IsServer() then
 		return getServerRemote(remoteName, "RemoteFunction") :: RemoteFunction
@@ -139,13 +139,13 @@ end
 	服务端 handler 签名为 `(player, ...)`；客户端 handler 签名为 `(...)`。
 
 	```lua
-	Net.Connect("Round/Started", function(roundId)
+	Net.connect("Round/Started", function(roundId)
 		print(roundId)
 	end)
 	```
 ]=]
-function Net.Connect(name: string, handler: (...any) -> ()): RBXScriptConnection
-	local remote = Net.RemoteEvent(name)
+function Net.connect(name: string, handler: (...any) -> ()): RBXScriptConnection
+	local remote = Net.remoteEvent(name)
 	if RunService:IsServer() then
 		return remote.OnServerEvent:Connect(handler)
 	end
@@ -156,77 +156,77 @@ end
 	仅服务端：注册一个 RemoteFunction 的处理器。
 
 	```lua
-	Net.Handle("CloudConfig/GetAll", function(player)
+	Net.handle("CloudConfig/GetAll", function(player)
 		return snapshot
 	end)
 	```
 ]=]
-function Net.Handle(name: string, handler: (player: Player, ...any) -> ...any)
+function Net.handle(name: string, handler: (player: Player, ...any) -> ...any)
 	if not RunService:IsServer() then
 		error("Handle can only be called on the server", 2)
 	end
 
-	Net.RemoteFunction(name).OnServerInvoke = handler
+	Net.remoteFunction(name).OnServerInvoke = handler
 end
 
 --[=[
 	仅客户端：调用服务端的 RemoteFunction 并返回其结果。
 
 	```lua
-	local snapshot = Net.Invoke("CloudConfig/GetAll")
+	local snapshot = Net.invoke("CloudConfig/GetAll")
 	```
 ]=]
-function Net.Invoke(name: string, ...: any): ...any
+function Net.invoke(name: string, ...: any): ...any
 	if RunService:IsServer() then
 		error("Invoke can only be called on the client", 2)
 	end
 
-	return Net.RemoteFunction(name):InvokeServer(...)
+	return Net.remoteFunction(name):InvokeServer(...)
 end
 
 --[=[
 	仅客户端：向服务端发送 RemoteEvent。
 
 	```lua
-	Net.FireServer("Round/Ready")
+	Net.fireServer("Round/Ready")
 	```
 ]=]
-function Net.FireServer(name: string, ...: any)
+function Net.fireServer(name: string, ...: any)
 	if RunService:IsServer() then
 		error("FireServer can only be called on the client", 2)
 	end
 
-	Net.RemoteEvent(name):FireServer(...)
+	Net.remoteEvent(name):FireServer(...)
 end
 
 --[=[
 	仅服务端：向指定玩家发送 RemoteEvent。
 
 	```lua
-	Net.FireClient("Round/Started", player, roundId)
+	Net.fireClient("Round/Started", player, roundId)
 	```
 ]=]
-function Net.FireClient(name: string, player: Player, ...: any)
+function Net.fireClient(name: string, player: Player, ...: any)
 	if not RunService:IsServer() then
 		error("FireClient can only be called on the server", 2)
 	end
 
-	Net.RemoteEvent(name):FireClient(player, ...)
+	Net.remoteEvent(name):FireClient(player, ...)
 end
 
 --[=[
 	仅服务端：向全部客户端发送 RemoteEvent。
 
 	```lua
-	Net.FireAllClients("Round/Started", roundId)
+	Net.fireAllClients("Round/Started", roundId)
 	```
 ]=]
-function Net.FireAllClients(name: string, ...: any)
+function Net.fireAllClients(name: string, ...: any)
 	if not RunService:IsServer() then
 		error("FireAllClients can only be called on the server", 2)
 	end
 
-	Net.RemoteEvent(name):FireAllClients(...)
+	Net.remoteEvent(name):FireAllClients(...)
 end
 
 return Net

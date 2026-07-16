@@ -18,21 +18,21 @@ On the server, calling `RemoteEvent(name)` or `RemoteFunction(name)` for an alre
 local Net = require(game.ReplicatedStorage.Packages.Net)
 
 -- Server
-Net.Handle("CloudConfig/GetAll", function(player)
+Net.handle("CloudConfig/GetAll", function(player)
 	return snapshot
 end)
 
-Net.Connect("RoundStarted", function(player, roundId)
+Net.connect("RoundStarted", function(player, roundId)
 	print(player, roundId)
 end)
 
-Net.FireClient("RoundStarted", player, roundId)
-Net.FireAllClients("RoundStarted", roundId)
+Net.fireClient("RoundStarted", player, roundId)
+Net.fireAllClients("RoundStarted", roundId)
 
 -- Client
-local snapshot = Net.Invoke("CloudConfig/GetAll")
-Net.FireServer("Ready")
-Net.Connect("RoundStarted", function(roundId)
+local snapshot = Net.invoke("CloudConfig/GetAll")
+Net.fireServer("Ready")
+Net.connect("RoundStarted", function(roundId)
 	print(roundId)
 end)
 ```
